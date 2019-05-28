@@ -1,0 +1,56 @@
+# Saurav Acharya @ Gas Technology Institute
+
+Installed version: v0.10.2 https://www.apache.org/dyn/closer.cgi?path=/kafka/0.10.2.0/kafka_2.11-0.10.2.0.tgz   
+
+
+# kafka command line to send data:
+echo "Data 1, Data 2, Data 3" | ~/Kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic Data4mBlackbox  > /dev/null
+
+# to verify the delivery of data:
+~/Kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic RawData4mBlackbox --from-beginning
+
+# run Kafka Server
+nohup ~/Kafka/bin/kafka-server-start.sh ~/Kafka/config/server.properties > ~/Kafka/kafka.log 2>&1 &
+
+# run Kafka manager
+nohup bin/kafka-manager > ~/kafka-manager-1.3.3.1/logs/kafka-manager.log 2>&1 &
+
+# run WebSocket Router
+screen -S wsr
+sudo python ~/EENWebsocketRouter/EENRouter.py --run router
+
+# run Blackbox responder
+screen -S bbresponder
+sudo python ~/EENWebsocketRouter/Respond2BB.py
+
+# create topics and their partitions
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic RawData4mBlackbox # Topic takes data raw decrypted data from BB
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic RawData4mBlackbox_Dev # Same as above but DEV
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic Data4mBlackbox # raw decrypted data from BB with ML Activity
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic Data4mBlackbox_Dev# Same as above but DEV
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic SystemConfig4mBlackbox # Raw decrypted data from BB - Sys attributes only
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic Message4mGeoEventServer #Data from GeoEvent - No Activity - Alarm Functions
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic Notification4mSystem #For email Puposes - Error Handling
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic Data2Blackbox # Topic to send commands fr BB actions - Lights, Alarm, etc. 
+~/Kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic ActivityPrediction4mAlgorithm # Prdeiction from ML logic - prdeiction added to Data4mBlackbox which GeoEvent Consumes 
+
+# specify topics retention time
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic Data4mBlackbox --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic Data4mBlackbox_Dev --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic RawData4mBlackbox --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic RawData4mBlackbox_Dev --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic SystemConfig4mBlackbox --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic Data4mGeoEventServer --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic Message4mGeoEventServer --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic Notification4mSystem --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic Data2Blackbox --config retention.ms=10000
+~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic ActivityPrediction4mAlgorithm --config retention.ms=10000
+
+# describe  topic
+ ~/Kafka/bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic ActivityPrediction4mAlgorithm
+
+# delete topic
+ ~/Kafka/bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic Data4mGeoEvent
+
+# list all topics
+~/Kafka/bin/kafka-topics.sh --list --zookeeper localhost:2181

@@ -1,0 +1,15 @@
+
+# to check if websocket router is working
+websocket.org/echo.html  => Connect to "ingress.gastechnology.org"
+
+# run all services (i.e., websocket, kafka, predictive, notification services)
+sh ~/EENWebsocketRouter/bin/start-all.sh
+
+# stop all services (i.e., websocket, kafka, predictive, notification services)
+sh ~/EENWebsocketRouter/bin/stop-all.sh
+
+# to check if blackbox devices are connected/and sending data
+~/Kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic Data4mBlackbox  --from-beginning
+
+# to check if blackbox devices are sending system config messages
+~/Kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic SystemConfig4mBlackbox  --from-beginning
